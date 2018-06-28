@@ -1,0 +1,7 @@
+# .wx.<project>.yaml
+# place a copy in your top level dev directory
+defaultGitOwner: wxio
+repos:
+- path: api
+- path: impl1
+- path: impl2
