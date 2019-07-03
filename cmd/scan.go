@@ -76,20 +76,20 @@ func collectDir(dir string, dirs *[]*Repo) {
 			remote, ex := cg.Remotes["origin"]
 			if !ex {
 				fmt.Printf("no origin for  '%v'\n", dir)
-				return
-			}
-			urls := remote.URLs
-			for _, url := range urls {
-				if strings.Contains(url, *wxconfig.Matches.GitOrigin) {
-					re := &Repo{Path: dir}
-					*dirs = append(*dirs, re)
-					// if dir == "." {
-					// 	re.Url = url
-					// }
-					if re.Address() != url {
-						re.Url = url
+			} else {
+				urls := remote.URLs
+				for _, url := range urls {
+					if strings.Contains(url, *wxconfig.Matches.GitOrigin) {
+						re := &Repo{Path: dir}
+						*dirs = append(*dirs, re)
+						// if dir == "." {
+						// 	re.Url = url
+						// }
+						if re.Address() != url {
+							re.Url = url
+						}
+						break
 					}
-					break
 				}
 			}
 		} else {
