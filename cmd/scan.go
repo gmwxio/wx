@@ -73,7 +73,13 @@ matches:
 func collectDir(dir string, dirs *[]*Repo) {
 	if gr, err := git.PlainOpen(dir); err == nil {
 		if cg, err := gr.Config(); err == nil {
-			for _, url := range cg.Remotes["origin"].URLs {
+			remote, ex := cg.Remotes["origin"]
+			if !ex {
+				fmt.Printf("no origin for  '%v'\n", dir)
+				return
+			}
+			urls := remote.URLs
+			for _, url := range urls {
 				if strings.Contains(url, *wxconfig.Matches.GitOrigin) {
 					re := &Repo{Path: dir}
 					*dirs = append(*dirs, re)
