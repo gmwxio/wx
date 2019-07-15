@@ -1,0 +1,10 @@
+{
+    "DefaultGitOwner": "wxio",
+    "repo": [
+        {
+            "path": "wx",
+            "owner": "wxio",
+            "url": "git@github.com:wxio/wx.git"
+        }
+    ]
+}

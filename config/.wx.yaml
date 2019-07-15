@@ -1,9 +1,0 @@
-# .wx.yaml
-# place a copy in your top level dev directory
-# eg c:\wxio\%USERNAME%
-# run wx from top level dev dir
-#
-project: wxio
-# attributes used to match repos to include
-matches:
-  git.origin: git@github.com:wxio

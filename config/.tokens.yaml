@@ -1,3 +1,0 @@
-# generate one from https://github.com/settings/tokens
-# Don't add access token to source control
-GITHUB_API_TOKEN: xxx
