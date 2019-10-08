@@ -6,8 +6,6 @@ import (
 	"strings"
 
 	"github.com/wxio/wx/internal/types"
-
-	"github.com/jpillora/opts"
 )
 
 type shell struct {
@@ -15,9 +13,9 @@ type shell struct {
 	rt   *types.Root
 }
 
-func New(rt *types.Root) opts.Opts {
-	sh := &shell{rt: rt}
-	return opts.New(sh).Name("sh")
+// New constructor for sh sub command
+func New(rt *types.Root) interface{} {
+	return &shell{rt: rt}
 }
 
 func (sh *shell) Run() {
@@ -28,7 +26,7 @@ func (sh *shell) Run() {
 		c.Dir = ws.Path
 		out, err := c.CombinedOutput()
 		if err != nil {
-			ws.Out = fmt.Sprintf("error getting sh %v %v\n", ws.Name(), err)
+			ws.Out = fmt.Sprintf("error getting sh %v %v\n---\n%s\n---\n", ws.Name(), err, string(out))
 			return
 		}
 		ws.Out = string(out)

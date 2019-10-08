@@ -5,16 +5,17 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jpillora/opts"
-
+	"github.com/wxio/wx/internal/genmd"
 	"github.com/wxio/wx/internal/git"
 	"github.com/wxio/wx/internal/initopts"
 	"github.com/wxio/wx/internal/shell"
 	"github.com/wxio/wx/internal/types"
+
+	"github.com/jpillora/opts"
 )
 
 func main() {
-	cwd, path, err := getConfig(".wx.json")
+	cwd, path, err := getConfig(".wx.yaml")
 	if err != nil && os.Getenv("COMP_LINE") == "" {
 		fmt.Fprintf(os.Stderr, "Error %v\n", err)
 		os.Exit(1)
@@ -23,18 +24,20 @@ func main() {
 		WorkspaceRoot: path,
 		CWD:           cwd,
 	}
-	cfg := filepath.Join(path, ".wx.json")
-	opts.New(r).
+	cfg := filepath.Join(path, ".wx.yaml")
+	op := opts.New(r).
 		Name("wx").
 		EmbedGlobalFlagSet().
 		Complete().
 		Version(types.Version).
-		AddCommand(initopts.New()).
-		AddCommand(git.New(r)).
-		AddCommand(shell.New(r)).
+		AddCommand(opts.New(initopts.New(r)).Name("init")).
+		AddCommand(opts.New(git.New(r)).Name("git")).
+		AddCommand(opts.New(shell.New(r)).Name("sh")).
+		AddCommand(opts.New(genmd.New(r)).Name("gen-markdown")).
 		ConfigPath(cfg).
-		Parse().
-		RunFatal()
+		Parse()
+	r.TagMatcher()
+	op.RunFatal()
 }
 
 func getConfig(cfg string) (string, string, error) {

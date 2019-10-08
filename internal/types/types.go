@@ -19,15 +19,20 @@ type Root struct {
 	GroupOutput     bool
 	Parallelism     int
 	DefaultGitOwner string
+	Tags            []string `help:"selects workspace based on tags. Tags are ANDed. Leading '~' is not.\n    eg tagged t1 and not t2 'gb -t t1 -t ~t2 sh pwd'"`
+	NoHead          bool
 	Workspaces      []Workspace `opts:"-" json:"repo,omitempty"`
+	//
+	workspaces []*Workspace
 }
 
 type Workspace struct {
 	Path     string
-	GitOwner string `json:"owner,omitempty"`
-	RepoName string `json:"name,omitempty"`
-	Url      string `json:"url,omitempty"`
-	Out      string `json:"-" opts:"-"`
+	GitOwner string   `json:"owner,omitempty"`
+	RepoName string   `json:"name,omitempty"`
+	Url      string   `json:"url,omitempty"`
+	Tags     []string `json:"tags,omitempty"`
+	Out      string   `json:"-" opts:"-"`
 }
 
 func (r *Root) Run() {
@@ -61,14 +66,52 @@ func (repo *Workspace) Address(owner string) string {
 	return url
 }
 
-func (root *Root) Pexec(args []string, f func(*Workspace)) {
-	pa := len(root.Workspaces)
+func (root *Root) TagMatcher() {
+	if len(root.Tags) > 0 {
+	OUTER:
+		for i := range root.Workspaces {
+			w := root.Workspaces[i]
+			// && the tags
+		HAS:
+			for _, rt := range root.Tags {
+				if rt[0] == '~' {
+					for _, t := range w.Tags {
+						if t == rt[1:] {
+							continue OUTER
+						}
+					}
+					continue HAS
+				} else {
+					for _, t := range w.Tags {
+						if t == rt {
+							continue HAS
+						}
+					}
+				}
+				continue OUTER
+			}
+			root.workspaces = append(root.workspaces, &w)
+		}
+	} else {
+		for i := range root.Workspaces {
+			w := root.Workspaces[i]
+			root.workspaces = append(root.workspaces, &w)
+		}
+	}
+}
+
+func (root *Root) Pexec(args []string, f func(ws *Workspace)) {
+	if len(root.workspaces) == 0 {
+		fmt.Printf("No workspaces for tags '%v'\n", root.Tags)
+		return
+	}
+	pa := len(root.workspaces)
 	if root.Parallelism != 0 {
 		pa = root.Parallelism
 	}
 	sem := make(chan bool, pa)
 	var wg = sync.WaitGroup{}
-	for i, _ := range root.Workspaces {
+	for _, w := range root.workspaces {
 		sem <- true
 		wg.Add(1)
 		go func(repo *Workspace) {
@@ -77,7 +120,7 @@ func (root *Root) Pexec(args []string, f func(*Workspace)) {
 			}()
 			f(repo)
 			wg.Done()
-		}(&root.Workspaces[i])
+		}(w)
 	}
 	wg.Wait()
 }
@@ -86,23 +129,28 @@ func (root *Root) PrintOutput() {
 	if root.GroupOutput {
 		omap := make(map[string][]string)
 		omapO := make([]string, 0)
-		for _, r := range root.Workspaces {
+		for _, r := range root.workspaces {
 			if _, ex := omap[r.Out]; !ex {
 				omapO = append(omapO, r.Out)
 			}
 			omap[r.Out] = append(omap[r.Out], r.Name())
 		}
 		for _, k := range omapO {
-			fmt.Fprintf(os.Stderr, `
+			if !root.NoHead {
+				fmt.Fprintf(os.Stderr, `
 ---- Repositories: -------------------------------------------------------------------
-%[2]v
+%v
 ----    message:   -------------------------------------------------------------------
-%[1]v--------------------------------------------------------------------------------------
-`, k, omap[k])
+`, omap[k])
+			}
+			fmt.Printf("%s", k)
 		}
 	} else {
-		for _, r := range root.Workspaces {
-			fmt.Fprintf(os.Stderr, "--------- %s ---------:\n%s", r.Name(), r.Out)
+		for _, r := range root.workspaces {
+			if !root.NoHead {
+				fmt.Fprintf(os.Stderr, "--------- %s ---------\n", r.Name())
+			}
+			fmt.Printf("%s", r.Out)
 		}
 	}
 }

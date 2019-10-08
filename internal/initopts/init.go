@@ -3,19 +3,22 @@ package initopts
 import (
 	"fmt"
 
-	"github.com/jpillora/opts"
+	"gopkg.in/yaml.v2"
+
+	"github.com/wxio/wx/internal/types"
 )
 
 type initOpts struct {
+	rt *types.Root
 }
 
-func New() opts.Opts {
-	in := initOpts{	}
-	return opts.New(&in).Name("init")
+// New constructor for initOpts
+func New(rt *types.Root) interface{} {
+	return &initOpts{rt: rt}
 }
 
 func (in *initOpts) Run() error {
-	fmt.Printf("#init %+v\n", in)
-	return nil
+	out, err := yaml.Marshal(in.rt)
+	fmt.Printf("#dump \n%+v\n", string(out))
+	return err
 }
-

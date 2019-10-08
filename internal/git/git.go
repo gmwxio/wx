@@ -5,11 +5,10 @@ import (
 	"os"
 	"sync"
 
-	"github.com/wxio/wx/internal/types"
-
 	"github.com/Masterminds/vcs"
 	"github.com/google/go-github/github"
 	"github.com/jpillora/opts"
+	"github.com/wxio/wx/internal/types"
 	gogit "gopkg.in/src-d/go-git.v4"
 )
 
