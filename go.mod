@@ -2,8 +2,9 @@ module github.com/wxio/wx
 
 go 1.12
 
-//replace github.com/jpillora/opts => github.com/millergarym/opts v1.1.3
-replace github.com/jpillora/opts => /home/garym/devel/millergarym/opts
+replace github.com/jpillora/opts => github.com/millergarym/opts v1.1.8
+
+//replace github.com/jpillora/opts => /home/garym/devel/millergarym/opts
 
 require (
 	github.com/Masterminds/vcs v1.13.1

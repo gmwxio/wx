@@ -14,7 +14,7 @@ import (
 
 func New(rt *types.Root) opts.Opts {
 	gc := &gitCmd{rt: rt}
-	return opts.New(rt).Name("git").
+	return opts.New(gc).Name("git").
 		AddCommand(opts.New(&cloneCmd{gc}).Name("clone"))
 }
 

@@ -24,19 +24,24 @@ func main() {
 		WorkspaceRoot: path,
 		CWD:           cwd,
 	}
+	rcfg := &types.Root{
+		WorkspaceRoot: path,
+		CWD:           cwd,
+	}
 	cfg := filepath.Join(path, ".wx.yaml")
-	op := opts.New(r).
+	op := opts.New(rcfg).
 		Name("wx").
 		EmbedGlobalFlagSet().
 		Complete().
-		Version(types.Version).
+		// Version(types.Version).
+		AddCommand(opts.New(&types.VersionCmd{}).Name("version")).
 		AddCommand(opts.New(initopts.New(r)).Name("init")).
 		AddCommand(opts.New(git.New(r)).Name("git")).
 		AddCommand(opts.New(shell.New(r)).Name("sh")).
 		AddCommand(opts.New(genmd.New(r)).Name("gen-markdown")).
 		ConfigPath(cfg).
 		Parse()
-	r.TagMatcher()
+	rcfg.Configure(r)
 	op.RunFatal()
 }
 
