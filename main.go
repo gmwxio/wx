@@ -5,9 +5,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/wxio/wx/internal/dump"
 	"github.com/wxio/wx/internal/genmd"
 	"github.com/wxio/wx/internal/git"
-	"github.com/wxio/wx/internal/initopts"
+	"github.com/wxio/wx/internal/initcli"
 	"github.com/wxio/wx/internal/shell"
 	"github.com/wxio/wx/internal/types"
 
@@ -35,7 +36,8 @@ func main() {
 		Complete().
 		// Version(types.Version).
 		AddCommand(opts.New(&types.VersionCmd{}).Name("version")).
-		AddCommand(opts.New(initopts.New(r)).Name("init")).
+		AddCommand(opts.New(initcli.New(r)).Name("init")).
+		AddCommand(opts.New(dump.New(r)).Name("dump")).
 		AddCommand(opts.New(git.New(r)).Name("git")).
 		AddCommand(opts.New(shell.New(r)).Name("sh")).
 		AddCommand(opts.New(genmd.New(r)).Name("gen-markdown")).

@@ -1,4 +1,4 @@
-package initopts
+package dump
 
 import (
 	"fmt"
