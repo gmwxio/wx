@@ -7,21 +7,29 @@ import (
 	"sync"
 )
 
+// Set by build tool chain
 var (
 	Version string = "dev"
 	Date    string = "na"
 	Commit  string = "na"
 )
 
+// Root struct for commands
+// Field tags control where the values come from
+// If opts:"-" yaml:"-" are set in object creation
+//    opts:="-" come from config file
+//    yaml:="-" come from command line flags
 type Root struct {
 	WorkspaceRoot   string      `opts:"-" yaml:"-"`
 	CWD             string      `opts:"-" yaml:"-"`
-	GroupOutput     bool        `help:"group by output. eg useful in 'wx -g sh git status --short'" yaml:"-"`
-	Parallelism     int         `help:"max number of tasks to run in parallel. Defaults to 0 ie all" yaml:"-"`
-	DefaultGitOwner string      `yaml:",omitempty"`
-	Tags            []string    `help:"selects workspace based on tags. Tags are ANDed. Leading '~' is not.\n    eg tagged t1 and not t2 'wx -t t1 -t ~t2 sh pwd'"`
-	NoHead          bool        `yaml:",omitempty"`
-	Workspaces      []Workspace `opts:"-" json:"repo,omitempty"`
+	RootCfg         *Root       `opts:"-" yaml:"-"`
+	GroupOutput     bool        `yaml:"-" help:"group by output. eg useful in 'wx -g sh git status --short'"`
+	Parallelism     int         `yaml:"-" help:"max number of tasks to run in parallel. Defaults to 0 ie all"`
+	DefaultGitOwner string      `opts:"-"`
+	EmptyTag        bool        `yaml:"-" help:"if set the 'tags' are ignored"`
+	Tags            []string    `yaml:",flow" help:"selects workspace based on tags. Tags are ANDed. Leading '~' is not.\n    eg tagged t1 and not t2 'wx -t t1 -t ~t2 sh pwd'"`
+	NoHead          bool        `yaml:"-"`
+	Workspaces      []Workspace `opts:"-"`
 	// //
 	// workspaces []*Workspace
 }
@@ -67,22 +75,28 @@ func (repo *Workspace) Address(owner string) string {
 	}
 	return url
 }
-func (root *Root) Configure(rcfg *Root) {
-	rcfg.WorkspaceRoot = root.WorkspaceRoot
-	rcfg.CWD = root.CWD
-	rcfg.GroupOutput = root.GroupOutput
-	rcfg.Parallelism = root.Parallelism
-	rcfg.DefaultGitOwner = root.DefaultGitOwner
-	rcfg.Tags = root.Tags
-	rcfg.NoHead = root.NoHead
+func (root *Root) Configure(rcfg, rflg *Root) {
+	root.GroupOutput = rflg.GroupOutput
+	root.Parallelism = rflg.Parallelism
+	root.NoHead = rflg.NoHead
+	//
+	root.DefaultGitOwner = rcfg.DefaultGitOwner
+	//
+	if !rflg.EmptyTag {
+		if len(rflg.Tags) != 0 {
+			root.Tags = rflg.Tags
+		} else {
+			root.Tags = rcfg.Tags
+		}
+	}
 	root.tagMatcher(rcfg)
 }
 
 func (root *Root) tagMatcher(rcfg *Root) {
 	if len(root.Tags) > 0 {
 	OUTER:
-		for i := range root.Workspaces {
-			w := root.Workspaces[i]
+		for i := range rcfg.Workspaces {
+			w := rcfg.Workspaces[i]
 			// && the tags
 		HAS:
 			for _, rt := range root.Tags {
@@ -102,12 +116,12 @@ func (root *Root) tagMatcher(rcfg *Root) {
 				}
 				continue OUTER
 			}
-			rcfg.Workspaces = append(rcfg.Workspaces, w)
+			root.Workspaces = append(root.Workspaces, w)
 		}
 	} else {
-		for i := range root.Workspaces {
-			w := root.Workspaces[i]
-			rcfg.Workspaces = append(rcfg.Workspaces, w)
+		for i := range rcfg.Workspaces {
+			w := rcfg.Workspaces[i]
+			root.Workspaces = append(root.Workspaces, w)
 		}
 	}
 }

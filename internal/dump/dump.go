@@ -2,6 +2,9 @@ package dump
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 
 	"gopkg.in/yaml.v2"
 
@@ -9,7 +12,8 @@ import (
 )
 
 type initOpts struct {
-	rt *types.Root
+	rt    *types.Root
+	Write bool `help:"Write the config back to the file."`
 }
 
 // New constructor for initOpts
@@ -18,7 +22,12 @@ func New(rt *types.Root) interface{} {
 }
 
 func (in *initOpts) Run() error {
+	if in.Write {
+		out, err := yaml.Marshal(in.rt.RootCfg)
+		err = ioutil.WriteFile(filepath.Join(in.rt.WorkspaceRoot, ".wx.yaml"), out, os.ModePerm)
+		return err
+	}
 	out, err := yaml.Marshal(in.rt)
-	fmt.Printf("#dump \n%+v\n", string(out))
+	fmt.Printf("#dump cfg : %v/.wx.yaml\n%+v\n", in.rt.WorkspaceRoot, string(out))
 	return err
 }

@@ -21,16 +21,15 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error %v\n", err)
 		os.Exit(1)
 	}
+	rcfg := &types.Root{}
+	rflg := &types.Root{}
 	r := &types.Root{
 		WorkspaceRoot: path,
 		CWD:           cwd,
-	}
-	rcfg := &types.Root{
-		WorkspaceRoot: path,
-		CWD:           cwd,
+		RootCfg:       rcfg,
 	}
 	cfg := filepath.Join(path, ".wx.yaml")
-	op := opts.New(rcfg).
+	op := opts.New(rflg).
 		Name("wx").
 		EmbedGlobalFlagSet().
 		Complete().
@@ -41,9 +40,9 @@ func main() {
 		AddCommand(opts.New(git.New(r)).Name("git")).
 		AddCommand(opts.New(shell.New(r)).Name("sh")).
 		AddCommand(opts.New(genmd.New(r)).Name("gen-markdown")).
-		ConfigPath(cfg).
+		FieldConfigPath(cfg, rcfg).
 		Parse()
-	rcfg.Configure(r)
+	r.Configure(rcfg, rflg)
 	op.RunFatal()
 }
 
