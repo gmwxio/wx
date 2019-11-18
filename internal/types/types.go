@@ -45,7 +45,10 @@ type Workspace struct {
 	RepoName string   `json:"name,omitempty"  yaml:",omitempty"`
 	Url      string   `json:"url,omitempty"`
 	Tags     []string `json:"tags,omitempty"  yaml:",omitempty,flow"`
-	Out      string   `json:"-" opts:"-"  yaml:"-"`
+	Dna      *struct {
+		Output string
+	} `yaml:",omitempty"`
+	Out string `json:"-" opts:"-"  yaml:"-"`
 }
 
 func (r *VersionCmd) Run() {
