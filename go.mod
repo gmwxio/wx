@@ -2,7 +2,8 @@ module github.com/wxio/wx
 
 go 1.12
 
-replace github.com/jpillora/opts => github.com/millergarym/opts v1.1.8
+// replace github.com/jpillora/opts => github.com/millergarym/opts v1.1.8
+replace github.com/jpillora/opts => /home/garym/go/src/github.com/millergarym/opts
 
 //replace github.com/jpillora/opts => /home/garym/devel/millergarym/opts
 

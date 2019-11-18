@@ -34,6 +34,9 @@ type Root struct {
 	// workspaces []*Workspace
 }
 
+// WorkspaceRoot for completions
+var WorkspaceRoot string
+
 type VersionCmd struct{}
 
 type Workspace struct {

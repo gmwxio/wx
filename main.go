@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/wxio/wx/internal/dump"
+	"github.com/wxio/wx/internal/env"
 	"github.com/wxio/wx/internal/genmd"
 	"github.com/wxio/wx/internal/git"
 	"github.com/wxio/wx/internal/initcli"
@@ -36,7 +36,9 @@ func main() {
 		// Version(types.Version).
 		AddCommand(opts.New(&types.VersionCmd{}).Name("version")).
 		AddCommand(opts.New(initcli.New(r)).Name("init")).
-		AddCommand(opts.New(dump.New(r)).Name("dump")).
+		AddCommand(opts.New(env.New(r)).Name("env")).
+		AddCommand(opts.New(env.NewSetTags(r)).Name("set_tags")).
+		AddCommand(opts.New(env.NewAddTagsToWS(r)).Name("add_tags_to_workspace")).
 		AddCommand(opts.New(git.New(r)).Name("git")).
 		AddCommand(opts.New(shell.New(r)).Name("sh")).
 		AddCommand(opts.New(genmd.New(r)).Name("gen-markdown")).
