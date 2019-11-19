@@ -19,7 +19,7 @@ type initOpts struct {
 
 type setTags struct {
 	rt   *types.Root
-	Tags []string `opts:"mode=arg"`
+	Tags tagspredict `opts:"mode=arg"`
 }
 
 type listTags struct {
@@ -73,27 +73,25 @@ func (in *setTags) Run() error {
 }
 
 func (in *listTags) Run() error {
+	tags := listTagsFunc(in.rt.RootCfg.Workspaces)
+	fmt.Printf("active : %v\n", in.rt.Tags)
+	fmt.Printf("all    : %v\n", tags)
+	return nil
+}
+
+func listTagsFunc(workspaces []types.Workspace) []string {
 	m := map[string]struct{}{}
-	mt := map[string]bool{}
-	for _, ws := range in.rt.RootCfg.Workspaces {
+	for _, ws := range  workspaces {
 		for _, t := range ws.Tags {
 			m[t] = struct{}{}
 		}
 	}
 	tags := make([]string, 0, len(m))
-	for _, t := range in.rt.Tags {
-		mt[t] = true
-	}
 	for k := range m {
-		if mt[k] {
-			tags = append(tags, k+"*")
-		} else {
 			tags = append(tags, k)
-		}
 	}
 	sort.Sort(sort.StringSlice(tags))
-	fmt.Printf("tags : %v\n", tags)
-	return nil
+	return tags
 }
 
 func (in *addTagsToWS) Run() error {
@@ -120,14 +118,7 @@ func (in *addTagsToWS) Run() error {
 type wspredict []string
 
 func (wspredict) Complete(arg string) []string {
-	cfg := filepath.Join(types.WorkspaceRoot, ".wx.yaml")
-	// ioutil.R
-	f, err := os.Open(cfg)
-	if err != nil {
-		return []string{}
-	}
-	rcfg := types.Root{}
-	err = yaml.NewDecoder(f).Decode(&rcfg)
+	rcfg, err := loadCfg()
 	if err != nil {
 		return []string{}
 	}
@@ -136,4 +127,30 @@ func (wspredict) Complete(arg string) []string {
 		ret[i] = w.Name()
 	}
 	return ret
+}
+
+type tagspredict []string
+
+func (tagspredict) Complete(arg string) []string {
+	rcfg, err := loadCfg()
+	if err != nil {
+		return []string{}
+	}
+	tags := listTagsFunc(rcfg.Workspaces)
+	return tags
+}
+
+func loadCfg() (*types.Root, error) {
+	cfg := filepath.Join(types.WorkspaceRoot, ".wx.yaml")
+	// ioutil.R
+	f, err := os.Open(cfg)
+	if err != nil {
+		return nil, err
+	}
+	rcfg := types.Root{}
+	err = yaml.NewDecoder(f).Decode(&rcfg)
+	if err != nil {
+		return nil, err
+	}
+	return &rcfg, nil
 }
