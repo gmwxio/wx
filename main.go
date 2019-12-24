@@ -6,9 +6,10 @@ import (
 	"path/filepath"
 
 	"github.com/wxio/wx/internal/dna"
-	"github.com/wxio/wx/internal/env"
+	"github.com/wxio/wx/internal/env" 
 	"github.com/wxio/wx/internal/genmd"
 	"github.com/wxio/wx/internal/git"
+	"github.com/wxio/wx/internal/github"
 	"github.com/wxio/wx/internal/initcli"
 	"github.com/wxio/wx/internal/shell"
 	"github.com/wxio/wx/internal/types"
@@ -45,6 +46,7 @@ func main() {
 			AddCommand(opts.New(&struct{}{}).Name("workspaces").
 				AddCommand(opts.New(env.NewAddTagsToWS(r)).Name("add")))).
 		AddCommand(opts.New(git.New(r)).Name("git")).
+		AddCommand(opts.New(github.New(r)).Name("github")).
 		AddCommand(opts.New(shell.New(r)).Name("sh")).
 		AddCommand(opts.New(genmd.New(r)).Name("gen-markdown")).
 		FieldConfigPath(cfg, rcfg).

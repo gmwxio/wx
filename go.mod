@@ -11,6 +11,7 @@ require (
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/jpillora/md-tmpl v1.2.2
 	github.com/jpillora/opts v1.1.0
+	golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6
 	gopkg.in/src-d/go-git.v4 v4.12.0
 	gopkg.in/yaml.v2 v2.2.2
 )
