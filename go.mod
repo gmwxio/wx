@@ -13,5 +13,5 @@ require (
 	github.com/jpillora/opts v1.1.0
 	golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6
 	gopkg.in/src-d/go-git.v4 v4.12.0
-	gopkg.in/yaml.v2 v2.2.2
+	gopkg.in/yaml.v2 v2.2.8
 )
